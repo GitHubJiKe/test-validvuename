@@ -1,0 +1,22 @@
+{
+  "name": "test-validvuename",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GitHubJiKe/test-validvuename.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/GitHubJiKe/test-validvuename/issues"
+  },
+  "homepage": "https://github.com/GitHubJiKe/test-validvuename#readme",
+  "gitHooks":{
+    "pre-commit":"export AUTO_RENAME=true && node ./bin/check"
+  }
+}

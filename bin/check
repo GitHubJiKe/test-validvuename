@@ -1,0 +1,100 @@
+#!/usr/bin/env node
+
+const path = require("path");
+const fs = require("fs");
+const child_process = require("child_process");
+const colors = require("colors");
+// const inquirer = require('inquirer');
+const pkg = require("../package.json");
+
+const defaultPath = path.resolve(__dirname, "../src");
+
+const warningText = `命名遵循PascalCase约定。 组件文件名除index.vue之外，一律采用PascalCase(大驼峰)写法。\n原因是引入组件时，组件的变量通常用PascalCase格式，以区别于一般变量。\n组件文件名与变量名一致，方便对应`;
+
+const existFiles = child_process.execSync(`git ls-files`).toString("utf8");
+
+function check(_path = defaultPath) {
+	const rootDirs = fs.readdirSync(_path);
+
+	function isVueFile(filename) {
+		return /\.vue$/.test(filename);
+	}
+
+	const pathArr = [];
+
+	function readDirs(dirs, p) {
+		dirs.forEach((dir) => {
+			const fullDir = path.resolve(p, dir);
+			if (fs.statSync(fullDir).isDirectory()) {
+				const res = fs.readdirSync(fullDir);
+				if (Array.isArray(res)) {
+					readDirs(res, fullDir);
+				}
+			} else {
+				if (isVueFile(dir)) {
+					if (!/^[A-Z]/g.test(dir)) {
+						// unvalid Vue component filename
+						if (dir !== "index.vue") {
+							pathArr.push({
+								path: path.resolve(p, dir),
+								name: dir,
+							});
+						}
+					}
+				}
+			}
+		});
+	}
+
+	readDirs(rootDirs, _path);
+
+	if (!!pathArr.length) {
+		console.log(warningText.yellow, "\n");
+		if (process.env.AUTO_RENAME) {
+			console.log(
+				`接下来将会自动将这些文件名重命名，重命名之后请自行检查需要修改的引用到的文件。\n`
+					.yellow
+			);
+			const validNames = [];
+			pathArr.forEach((item) => {
+				const dir = item.path.split(item.name)[0];
+				const validName =
+					item.name.charAt(0).toUpperCase() +
+					item.name.substr(1, item.name.length);
+				validNames.push(validName);
+				fs.rename(item.path, dir + validName, () => {
+					gitRemoveUnvalidFile(item.path.split(`${pkg.name}/`)[1]);
+				});
+			});
+
+			console.log("重命名完成，请手动检查！\n".green);
+
+			pathArr.forEach((v, idx) => {
+				console.log(`${v.path} => ${validNames[idx]}`.green);
+			});
+
+			process.exit(1);
+		} else {
+			console.log(
+				`您有${pathArr.length}个vue组件文件名命名不规范，需要修改；它们分别是：\n`
+					.red
+			);
+			pathArr.forEach((v) => console.log(`${v.path} => ${v.name}`.red));
+
+			process.exit(1);
+		}
+	} else {
+		console.log("恭喜您的组件文件命名都符合规范!".green);
+	}
+}
+
+check();
+
+function gitRemoveUnvalidFile(path) {
+	if (existFiles.indexOf(path) === -1) {
+		return;
+	}
+
+	child_process.execSync(`git rm --cached ${path} -r`);
+	console.log("git rm " + path + "".green);
+}
