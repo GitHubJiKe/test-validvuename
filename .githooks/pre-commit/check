@@ -5,9 +5,9 @@ const fs = require("fs");
 const child_process = require("child_process");
 const colors = require("colors");
 // const inquirer = require('inquirer');
-const pkg = require("../package.json");
+const pkg = require("../../package.json");
 
-const defaultPath = path.resolve(__dirname, "../src");
+const defaultPath = path.resolve(__dirname, "../../src");
 
 const warningText = `命名遵循PascalCase约定。 组件文件名除index.vue之外，一律采用PascalCase(大驼峰)写法。\n原因是引入组件时，组件的变量通常用PascalCase格式，以区别于一般变量。\n组件文件名与变量名一致，方便对应`;
 
