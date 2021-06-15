@@ -16,9 +16,6 @@
     "url": "https://github.com/GitHubJiKe/test-validvuename/issues"
   },
   "homepage": "https://github.com/GitHubJiKe/test-validvuename#readme",
-  "gitHooks": {
-    "pre-commit": "export AUTO_RENAME=true && node ./bin/check"
-  },
   "devDependencies": {
     "colors": "^1.4.0",
     "git-hooks": "^1.1.10"
