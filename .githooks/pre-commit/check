@@ -69,7 +69,7 @@ function check(_path = defaultPath) {
 				fs.copyFileSync(item.path, dest); //copy 到目标路径下备份文件
 
 				gitRemoveUnvalidFile(item.path.split(`${pkg.name}/`)[1]); // 将git add 后的小写文件删除
-
+				fs.rmSync(item.path);
 				const newPath = dir + dest.split("__")[1];
 				console.log(dest, newPath);
 				fs.renameSync(dest, newPath); // 将备份文件重命名为正常文件
@@ -101,7 +101,6 @@ function check(_path = defaultPath) {
 check();
 
 function gitRemoveUnvalidFile(path) {
-	console.log(path);
 	if (existFiles.indexOf(path) === -1) {
 		return;
 	}
