@@ -106,6 +106,6 @@ function gitRemoveUnvalidFile(path) {
 		return;
 	}
 
-	child_process.execSync(`git rm --cached ${path} -f`);
+	child_process.execSync(`git rm --cached ${path} -r`);
 	console.log("git rm " + path + "".green);
 }
