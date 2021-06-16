@@ -50,7 +50,7 @@ function check(_path = defaultPath) {
 
 	if (!!pathArr.length) {
 		console.log(warningText.yellow, "\n");
-		if (process.env.AUTO_RENAME) {
+		if (1) {
 			console.log(
 				`接下来将会自动将这些文件名重命名，重命名之后请自行检查需要修改的引用到的文件。\n`
 					.yellow
@@ -58,16 +58,26 @@ function check(_path = defaultPath) {
 			const validNames = [];
 			pathArr.forEach((item) => {
 				const dir = item.path.split(item.name)[0];
+
 				const validName =
 					item.name.charAt(0).toUpperCase() +
 					item.name.substr(1, item.name.length);
 				validNames.push(validName);
-				fs.rename(item.path, dir + validName, () => {
-					gitRemoveUnvalidFile(item.path.split(`${pkg.name}/`)[1]);
-				});
+
+				const dest = dir + "__" + validName;
+
+				fs.copyFileSync(item.path, dest); //copy 到目标路径下备份文件
+
+				gitRemoveUnvalidFile(item.path.split(`${pkg.name}/`)[1]); // 将git add 后的小写文件删除
+
+				const newPath = dir + dest.split("__")[1];
+				console.log(dest, newPath);
+				fs.renameSync(dest, newPath); // 将备份文件重命名为正常文件
+
+				child_process.execSync("git add " + newPath); // 执行git add 操作
 			});
 
-			console.log("重命名完成，请手动检查！\n".green);
+			console.log("重命名完成，请手动检查aaaaa！\n".green);
 
 			pathArr.forEach((v, idx) => {
 				console.log(`${v.path} => ${validNames[idx]}`.green);
@@ -91,10 +101,11 @@ function check(_path = defaultPath) {
 check();
 
 function gitRemoveUnvalidFile(path) {
+	console.log(path);
 	if (existFiles.indexOf(path) === -1) {
 		return;
 	}
 
-	child_process.execSync(`git rm --cached ${path} -r`);
+	child_process.execSync(`git rm ${path} -f`);
 	console.log("git rm " + path + "".green);
 }
